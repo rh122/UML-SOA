@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review requirement briefs</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <main class="wrap">
+    <div class="review-layout">
+      <header class="review-head">
+        <p class="eyebrow">Requirement briefs</p>
+        <h1>Review</h1>
+        <p class="lede">Edit a title or outline, or present one brief at a time. The drone example is here before anyone submits. Changes stay in this browser.</p>
+        <p><a class="nav-link" href="index.html">New brief</a></p>
+      </header>
+      <aside class="qr">
+        <img src="assets/brief-form-qr.png" width="168" height="168" alt="QR code that opens the brief form">
+        <p>Form<br><a href="https://rh122.github.io/UML-SOA/">rh122.github.io/UML-SOA</a></p>
+      </aside>
+      <ul class="list" id="brief-list"></ul>
+    </div>
+  </main>
+  <section class="stage" id="stage" hidden>
+    <div class="stage-bar">
+      <button type="button" class="secondary" id="exit-present">Back to list</button>
+      <p id="counter"></p>
+    </div>
+    <div aria-live="polite">
+      <h1 id="stage-title"></h1>
+      <p class="outline" id="stage-outline"></p>
+    </div>
+    <div class="stage-nav">
+      <button type="button" class="secondary" id="prev-brief">Previous</button>
+      <button type="button" id="next-brief">Next</button>
+    </div>
+  </section>
+  <script src="briefs.js"></script>
+  <script>
+    var listEl = document.getElementById("brief-list");
+    var stage = document.getElementById("stage");
+    var stageTitle = document.getElementById("stage-title");
+    var stageOutline = document.getElementById("stage-outline");
+    var counter = document.getElementById("counter");
+    var prevButton = document.getElementById("prev-brief");
+    var nextButton = document.getElementById("next-brief");
+    var presentIndex = 0;
+    var editingId = null;
+
+    function render() {
+      var briefs = loadBriefs();
+      listEl.replaceChildren();
+      briefs.forEach(function (brief, index) {
+        var item = document.createElement("li");
+        item.className = "card";
+        if (brief.id === DRONE_BRIEF.id) {
+          var kicker = document.createElement("p");
+          kicker.className = "kicker";
+          kicker.textContent = "Example";
+          item.appendChild(kicker);
+        }
+        if (editingId === brief.id) {
+          item.appendChild(editForm(brief));
+        } else {
+          var heading = document.createElement("h2");
+          heading.textContent = brief.title;
+          var outline = document.createElement("p");
+          outline.className = "outline";
+          outline.textContent = brief.outline;
+          var actions = document.createElement("div");
+          actions.className = "card-actions";
+          actions.appendChild(actionButton("Edit", "secondary", function () {
+            editingId = brief.id;
+            render();
+          }));
+          actions.appendChild(actionButton("Present", "", function () {
+            openPresent(index);
+          }));
+          item.append(heading, outline, actions);
+        }
+        listEl.appendChild(item);
+      });
+    }
+
+    function actionButton(label, className, onClick) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      if (className) button.className = className;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function editForm(brief) {
+      var form = document.createElement("form");
+      var titleLabel = document.createElement("label");
+      titleLabel.textContent = "Title";
+      titleLabel.htmlFor = "edit-title";
+      var titleInput = document.createElement("input");
+      titleInput.id = "edit-title";
+      titleInput.value = brief.title;
+      titleInput.required = true;
+      titleInput.maxLength = 180;
+      var outlineLabel = document.createElement("label");
+      outlineLabel.textContent = "Outline";
+      outlineLabel.htmlFor = "edit-outline";
+      var outlineInput = document.createElement("textarea");
+      outlineInput.id = "edit-outline";
+      outlineInput.value = brief.outline;
+      outlineInput.required = true;
+      outlineInput.maxLength = 2000;
+      var error = document.createElement("p");
+      error.className = "error";
+      var actions = document.createElement("div");
+      actions.className = "card-actions";
+      var save = actionButton("Save", "", function () {});
+      save.type = "submit";
+      var cancel = actionButton("Cancel", "secondary", function () {
+        editingId = null;
+        render();
+      });
+      actions.append(save, cancel);
+      form.append(titleLabel, titleInput, outlineLabel, outlineInput, error, actions);
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var title = titleInput.value.trim();
+        var outline = outlineInput.value.trim();
+        if (!title || !outline) {
+          error.textContent = "Keep both a title and an outline.";
+          return;
+        }
+        var briefs = loadBriefs();
+        var target = briefs.find(function (item) { return item.id === brief.id; });
+        if (!target) return;
+        target.title = title;
+        target.outline = outline;
+        try {
+          saveBriefs(briefs);
+        } catch (err) {
+          error.textContent = "This browser blocked local storage, so the edit was not saved.";
+          return;
+        }
+        editingId = null;
+        render();
+      });
+      return form;
+    }
+
+    function openPresent(index) {
+      presentIndex = index;
+      document.body.classList.add("is-presenting");
+      stage.hidden = false;
+      showPresent();
+    }
+
+    function closePresent() {
+      document.body.classList.remove("is-presenting");
+      stage.hidden = true;
+    }
+
+    function showPresent() {
+      var briefs = loadBriefs();
+      if (!briefs.length) return;
+      if (presentIndex < 0) presentIndex = 0;
+      if (presentIndex >= briefs.length) presentIndex = briefs.length - 1;
+      stageTitle.textContent = briefs[presentIndex].title;
+      stageOutline.textContent = briefs[presentIndex].outline;
+      counter.textContent = (presentIndex + 1) + " of " + briefs.length;
+      prevButton.disabled = presentIndex === 0;
+      nextButton.disabled = presentIndex === briefs.length - 1;
+    }
+
+    document.getElementById("exit-present").addEventListener("click", closePresent);
+    prevButton.addEventListener("click", function () {
+      presentIndex -= 1;
+      showPresent();
+    });
+    nextButton.addEventListener("click", function () {
+      presentIndex += 1;
+      showPresent();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (stage.hidden) return;
+      if (event.key === "Escape") closePresent();
+      if (event.key === "ArrowRight" && !nextButton.disabled) {
+        presentIndex += 1;
+        showPresent();
+      }
+      if (event.key === "ArrowLeft" && !prevButton.disabled) {
+        presentIndex -= 1;
+        showPresent();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

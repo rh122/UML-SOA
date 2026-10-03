@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New requirement brief</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">Requirement briefs</p>
+    <h1>New brief</h1>
+    <p class="lede">A title and one paragraph for the top-level requirements. Submitting adds the brief to the review list in this browser.</p>
+    <p><a class="nav-link" href="review.html">Review and present</a></p>
+    <form id="brief-form">
+      <label for="title">Title</label>
+      <input id="title" name="title" required maxlength="180" autocomplete="off" value="DroneResponse — river rescue and item delivery">
+      <label for="outline">Outline</label>
+      <textarea id="outline" name="outline" required maxlength="2000">Scope is the UC1 and UC2 main use cases from sUAS-UseCases (SPLC-2020). UC1, River and Ice Search and Rescue, is led by the Drone Commander. UC2, Deliver Item to Target Location, is led by the Dispatcher. Compare monolith · orchestration, where only the Airspace Service is an existing system and the drone fleet is in scope, with microservices · choreography, where both the Airspace Service and the Fleet Service are existing systems outside the box.</textarea>
+      <p class="hint">One paragraph. The fields start from the DroneResponse system requirements. That example is already on the review page; submit to add another brief.</p>
+      <p class="error" id="form-error" role="alert"></p>
+      <div class="actions">
+        <button type="submit">Add to review</button>
+      </div>
+    </form>
+  </main>
+  <script src="briefs.js"></script>
+  <script>
+    var titleInput = document.getElementById("title");
+    var outlineInput = document.getElementById("outline");
+    var formError = document.getElementById("form-error");
+    titleInput.value = DRONE_BRIEF.title;
+    outlineInput.value = DRONE_BRIEF.outline;
+
+    document.getElementById("brief-form").addEventListener("submit", function (event) {
+      event.preventDefault();
+      var title = titleInput.value.trim();
+      var outline = outlineInput.value.trim();
+      if (!title || !outline) {
+        formError.textContent = "Add both a title and an outline.";
+        return;
+      }
+      var briefs = loadBriefs();
+      briefs.push({ id: createBriefId(), title: title, outline: outline });
+      try {
+        saveBriefs(briefs);
+      } catch (err) {
+        formError.textContent = "This browser blocked local storage, so the brief was not saved.";
+        return;
+      }
+      window.location.href = "review.html";
+    });
+  </script>
+</body>
+</html>
