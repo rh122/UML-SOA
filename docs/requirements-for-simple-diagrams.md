@@ -169,13 +169,14 @@ When instructed to generate an OO design for selected components:
 
 # Publishing the simple-study documents
 
-Publish exactly three files, with these paths, to a public GitHub repository. Leave PlantUML sources, rendered PNG and SVG files, and every other file in this folder unpublished.
+Publish three files, with these paths, to a public GitHub repository rh122/UML-SOA. Include PlantUML sources and linked rendered PNG or SVG files, so I can present directly from GitHub. 
+Make it concise and visual, suitable for a presentation in a browser.
 
 | Path | Role |
 |------|------|
 | `docs/system-requirements.md` | UC1 and UC2 scope and the two architecture choices |
 | `docs/requirements-for-simple-diagrams.md` | Diagram rules, including this section |
-| `docs/drone-response_design-simple-cursor.md` | The generated simple design |
+| `docs/drone-response_design-simple.md` | The generated simple design |
 
 - **Repository:** [rh122/UML-SOA](https://github.com/rh122/UML-SOA)
 - **Visibility:** public
