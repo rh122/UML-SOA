@@ -12,7 +12,7 @@
       <header class="review-head">
         <p class="eyebrow">Requirement briefs</p>
         <h1>Review</h1>
-        <p class="lede">Edit a title or outline, or present one brief at a time. The drone example is here before anyone submits. Changes stay in this browser.</p>
+        <p class="lede">Edit a title or outline, or present one brief at a time. Changes stay in this browser.</p>
         <p><a class="nav-link" href="index.html">New brief</a></p>
       </header>
       <aside class="qr">
@@ -51,15 +51,16 @@
     function render() {
       var briefs = loadBriefs();
       listEl.replaceChildren();
+      if (!briefs.length) {
+        var empty = document.createElement("li");
+        empty.className = "lede";
+        empty.textContent = "No briefs yet.";
+        listEl.appendChild(empty);
+        return;
+      }
       briefs.forEach(function (brief, index) {
         var item = document.createElement("li");
         item.className = "card";
-        if (brief.id === DRONE_BRIEF.id) {
-          var kicker = document.createElement("p");
-          kicker.className = "kicker";
-          kicker.textContent = "Example";
-          item.appendChild(kicker);
-        }
         if (editingId === brief.id) {
           item.appendChild(editForm(brief));
         } else {
