@@ -1,8 +1,8 @@
-/* Seeded from docs/system-requirements.md. Shown even when localStorage is empty. */
+/* Open-day example. Shown even when localStorage is empty. */
 var DRONE_BRIEF = {
   id: "drone-response",
-  title: "DroneResponse — river rescue and item delivery",
-  outline: "Scope is the UC1 and UC2 main use cases from sUAS-UseCases (SPLC-2020). UC1, River and Ice Search and Rescue, is led by the Drone Commander. UC2, Deliver Item to Target Location, is led by the Dispatcher. Compare monolith · orchestration, where only the Airspace Service is an existing system and the drone fleet is in scope, with microservices · choreography, where both the Airspace Service and the Fleet Service are existing systems outside the box."
+  title: "DroneResponse",
+  outline: "Drones help a team search for a missing person and carry a needed item to a chosen place. The team starts the mission, the drones fly it, and the team hears what was found and when the job is done."
 };
 
 var BRIEFS_KEY = "uml-soa-briefs";
